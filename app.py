@@ -1,5 +1,6 @@
 import streamlit as st
-
+import json
+from esg_evaluation import get_esg_evaluation_with_api 
 
 sections = {
     "Section 1": [
@@ -31,6 +32,8 @@ sections = {
 }
 
 
+st.set_page_config(page_title="ESG_SERVY")
+
 def display_questions(section_name, questions):
     responses = st.session_state.responses.get(section_name, {})
     for i, question in enumerate(questions):
@@ -42,12 +45,10 @@ def display_questions(section_name, questions):
     return responses
 
 
-
 if 'section' not in st.session_state:
     st.session_state.section = 0
 if 'responses' not in st.session_state:
     st.session_state.responses = {section: {} for section in sections}
-
 def main():
     section_names = list(sections.keys())
     total_sections = len(section_names)
@@ -79,19 +80,21 @@ def main():
                 st.experimental_rerun()
         else:
           if st.button('Submit', disabled=not all_answered):
-            import json
             user_responses = {}
-            question_counter = 1
             for section_name, questions in st.session_state.responses.items():
                 for question, response in questions.items():
-                    key = f"question{question_counter}"
-                    user_responses[key] = response
-                    question_counter += 1
-            st.write("User responses in JSON format:")
-            st.write(user_responses)
-            with open("user_responses.json", "w") as json_file:
-                json.dump(user_responses, json_file, indent=4)
-            # st.write("User responses saved in JSON file: user_responses.json")
+                    user_responses[question] = response
+
+            
+            model_response = get_esg_evaluation_with_api(user_responses)
+
+            # Display the model response in Streamlit
+            st.write("Model Response:")
+            st.write(model_response)
+
+            # Save user responses along with the model response to a JSON file
+            with open("user_responses_with_model.json", "w") as json_file:
+                json.dump({"user_responses": user_responses, "model_response": model_response}, json_file, indent=4)
                    
 if __name__ == '__main__':
     main()
