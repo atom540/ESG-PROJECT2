@@ -32,17 +32,15 @@ sections = {
 
 
 def display_questions(section_name, questions):
-    responses = {}
+    responses = st.session_state.responses.get(section_name, {})
     for i, question in enumerate(questions):
         key = f"{section_name}_{i}"
-        # Pre-fill with existing response if available
-        if section_name in st.session_state.responses and question in st.session_state.responses[section_name]:
-            response = st.session_state.responses[section_name][question]
-        else:
-            response = 0
+        response = responses.get(question, 0) 
         response = st.number_input(question, min_value=0, max_value=10, step=1, format="%d", key=key, value=response)
         responses[question] = response
+    st.session_state.responses[section_name] = responses  # Update session state with current responses
     return responses
+
 
 
 if 'section' not in st.session_state:
