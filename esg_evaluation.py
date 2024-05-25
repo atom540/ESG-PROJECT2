@@ -12,7 +12,7 @@ from openai import OpenAI
 
 client = OpenAI()
 
-# print(os.environ.get("OPENAI_API_KEY"))
+
 
 def get_esg_evaluation_with_api(user_responses):
     prompt = """
